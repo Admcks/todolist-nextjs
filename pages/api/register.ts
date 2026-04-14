@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../lib/prisma';
-import { hashPassword } from '../../../lib/hash';
+import { prisma } from '../../lib/prisma';
+import { hashPassword } from '../../lib/hash';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Only allow POST requests

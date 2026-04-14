@@ -4,7 +4,7 @@ import {signOut, useSession} from 'next-auth/react';
 import {useRouter} from 'next/router';
 import {Geist, Geist_Mono} from "next/font/google";
 
-// 1. Add this interface near your imports
+// 1. Interface for Note objects
 interface Note {
     id?: number;
     title: string;
@@ -13,7 +13,6 @@ interface Note {
     updatedAt?: string;
 }
 
-// Keep your existing fonts for a professional look
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
@@ -29,29 +28,26 @@ export default function Dashboard() {
     const [activeNote, setActiveNote] = useState<Note | null>(null);
     const [loading, setLoading] = useState(false);
 
+    // Fetch notes from the API
     const fetchNotes = useCallback(async () => {
         const res = await fetch('/api/notes');
         const data = await res.json();
         setNotes(data);
     }, []);
 
-    // 1. Protect the route: If not logged in, go to /login
+    // Session protection and initial fetch
     useEffect(() => {
         if (status === 'unauthenticated') {
             void router.push('/login');
         }
 
         if (status === 'authenticated') {
-            // This trick tells the linter: "I'll do this in a split second, not right now"
             const timer = setTimeout(() => {
                 void fetchNotes();
             }, 0);
-
-            return () => clearTimeout(timer); // Cleanup
+            return () => clearTimeout(timer);
         }
     }, [status, router, fetchNotes]);
-
-
 
     // 2. Save Note (Handles both Create and Update)
     const handleSave = async () => {
@@ -64,45 +60,62 @@ export default function Dashboard() {
             const method = activeNote.id ? 'PUT' : 'POST';
             const url = activeNote.id ? `/api/notes/${activeNote.id}` : '/api/notes';
 
-            // 1. We start the request
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(activeNote),
             });
 
-            // 2. We IMMEDIATELY check if the request was successful
-            // This is where that 'errorData' block goes!
             if (!response.ok) {
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("application/json") !== -1) {
                     const errorData = await response.json();
                     throw new Error(errorData.message || "Failed to save");
                 } else {
-                    // If it's HTML, the server crashed—get the status code instead
                     throw new Error(`Server Error: ${response.status}`);
                 }
             }
 
-            // 3. If successful, we refresh and close
             await fetchNotes();
-            setActiveNote(null);
+            setActiveNote(null); // Close editor on success
         } catch (err: unknown) {
-            // 4. If any of the above fails, it jumps here
             const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
             alert("Error saving note: " + errorMessage);
         } finally {
-            // 5. This runs no matter what to stop the loading spinner
             setLoading(false);
         }
     };
 
-    // 3. Export JSON (Requirement Task 5)
+    // 3. NEW: Handle Delete functionality
+    const handleDelete = async () => {
+        if (!activeNote || !activeNote.id) return;
+
+        if (!confirm(`Are you sure you want to delete "${activeNote.title}"?`)) return;
+
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/notes/${activeNote.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server Error: ${response.status}`);
+            }
+
+            await fetchNotes();
+            setActiveNote(null); // Close editor
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+            alert("Error deleting note: " + errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleExport = (id?: number) => {
         window.location.href = id ? `/api/notes/export?id=${id}` : '/api/notes/export';
     };
 
-    // 4. Import JSON (Requirement Task 6)
     const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -124,8 +137,7 @@ export default function Dashboard() {
 
     return (
         <div className={`${geistSans.variable} ${geistMono.variable} flex h-screen bg-white font-sans text-zinc-900`}>
-
-            {/* Sidebar */}
+            {/* Sidebar  */}
             <aside className="w-64 border-r border-zinc-200 bg-zinc-50 flex flex-col p-4">
                 <h2 className="text-xl font-bold mb-4">My Notes</h2>
 
@@ -162,7 +174,7 @@ export default function Dashboard() {
                 </div>
             </aside>
 
-            {/* Main Content Area */}
+            {/* Main Content Area  */}
             <main className="flex-1 flex flex-col p-8 overflow-y-auto">
                 {activeNote ? (
                     <div className="max-w-3xl mx-auto w-full">
@@ -173,7 +185,8 @@ export default function Dashboard() {
                             onChange={(e) => setActiveNote({...activeNote, title: e.target.value})}
                         />
 
-                        <div className="min-h-[400px] border border-zinc-100 rounded-lg p-4 bg-zinc-50/50">
+                        {/* BUG FIX: Added 'key' to force Editor refresh when switching notes */}
+                        <div key={activeNote.id ?? 'new-note'} className="min-h-[400px] border border-zinc-100 rounded-lg p-4 bg-zinc-50/50">
                             <Editor
                                 initialContent={activeNote.content}
                                 onChange={(json) => setActiveNote({...activeNote, content: json})}
@@ -188,6 +201,18 @@ export default function Dashboard() {
                             >
                                 {loading ? 'Saving...' : 'Save Changes'}
                             </button>
+
+                            {/* ADDED: Delete button, only shown for existing notes */}
+                            {activeNote.id && (
+                                <button
+                                    disabled={loading}
+                                    onClick={handleDelete}
+                                    className="px-6 py-2 rounded-full font-medium border border-red-500 text-red-500 hover:bg-red-50 disabled:opacity-50"
+                                >
+                                    Delete Note
+                                </button>
+                            )}
+
                             {activeNote.id && (
                                 <button
                                     onClick={() => handleExport(activeNote.id)}
