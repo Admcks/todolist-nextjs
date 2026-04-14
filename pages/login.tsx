@@ -38,13 +38,13 @@ export default function Login() {
 
                 <div className="space-y-4">
                     <input
-                        className="w-full p-2 border rounded outline-none focus:ring-1 focus:ring-black"
+                        className="w-full p-2 border rounded"
                         placeholder="Username"
                         required
                         onChange={e => setForm({...form, name: e.target.value})}
                     />
                     <input
-                        className="w-full p-2 border rounded outline-none focus:ring-1 focus:ring-black"
+                        className="w-full p-2 border rounded"
                         type="password"
                         placeholder="Password"
                         required
