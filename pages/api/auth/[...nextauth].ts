@@ -12,28 +12,41 @@ export const authOptions: NextAuthOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                if (!credentials?.name || !credentials.password) return null;
+                if (!credentials?.name || !credentials.password) {
+                    throw new Error("Missing username or password");
+                }
 
                 const user = await prisma.user.findUnique({
                     where: { name: credentials.name }
                 });
 
-                if (user && await verifyPassword(credentials.password, user.password)) {
-                    // Return the user object (id is a number)
-                    return { id: user.id.toString(), name: user.name };
+                if (!user) {
+                    throw new Error("No user found with that name");
                 }
-                return null;
+
+                const isValid = await verifyPassword(credentials.password, user.password);
+
+                if (!isValid) {
+                    throw new Error("Invalid password");
+                }
+
+                // Return the user object (NextAuth expects 'id' as a string)
+                return {
+                    id: user.id.toString(),
+                    name: user.name
+                };
             }
         })
     ],
-    session: { strategy: "jwt" },
+    session: {
+        strategy: "jwt"
+    },
     pages: {
         signIn: '/login',
+        error: '/login', // Redirect errors back to login
     },
     callbacks: {
         async session({ session, token }) {
-            // token.sub is the ID we returned in authorize (as a string)
-            // session.user.id was defined as a 'number' in our types/next-auth.d.ts
             if (token.sub && session.user) {
                 session.user.id = Number(token.sub);
             }
@@ -45,7 +58,8 @@ export const authOptions: NextAuthOptions = {
             }
             return token;
         }
-    }
+    },
+    secret: process.env.NEXTAUTH_SECRET, // Ensure this is in your .env!
 };
 
 export default NextAuth(authOptions);

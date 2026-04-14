@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]"; // You might need to export config from nextauth file
-import { prisma } from "@/lib/prisma";
+import { prisma } from "../../../lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // 1. Check if user is logged in (Requirement: Security)
@@ -40,3 +40,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(405).json({ message: "Method not allowed" });
 }
+
