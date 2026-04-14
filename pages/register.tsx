@@ -30,7 +30,7 @@ export default function Register() {
                     placeholder="Password"
                     onChange={e => setForm({...form, password: e.target.value})}
                 />
-                <button className="w-full bg-black text-white p-2 rounded">Create Account</button>
+                <button className="w-full bg-black text-white p-2 rounded hover:opacity-90 transition">Create Account</button>
             </form>
         </div>
     );
