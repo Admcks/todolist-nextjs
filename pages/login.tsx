@@ -26,8 +26,8 @@ export default function Login() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-white">
-            <form onSubmit={handleSubmit} className="p-8 border rounded-lg shadow-md space-y-4 w-full max-w-sm">
+        <div className="flex flex-col items-center justify-center h-screen ">
+            <form onSubmit={handleSubmit} className="p-8 border rounded-lg shadow-md space-y-4">
                 <h1 className="text-2xl font-bold">Login</h1>
 
                 {error && (
@@ -38,13 +38,13 @@ export default function Login() {
 
                 <div className="space-y-4">
                     <input
-                        className="w-full p-2 border rounded outline-none focus:ring-1 focus:ring-black"
+                        className="w-full p-2 border rounded"
                         placeholder="Username"
                         required
                         onChange={e => setForm({...form, name: e.target.value})}
                     />
                     <input
-                        className="w-full p-2 border rounded outline-none focus:ring-1 focus:ring-black"
+                        className="w-full p-2 border rounded"
                         type="password"
                         placeholder="Password"
                         required
@@ -56,8 +56,8 @@ export default function Login() {
                     Login
                 </button>
 
-                <p className="text-sm text-center text-zinc-600 pt-2">
-                    Don&#39;t have an account? <Link href="/register" className="underline text-black font-medium">Register</Link>
+                <p className="text-sm text-center text-gray-600 pt-2">
+                    Don&#39;t have an account? <Link href="/register" className="underline text-gray-400 font-medium">Register</Link>
                 </p>
             </form>
         </div>

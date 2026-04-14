@@ -47,7 +47,6 @@ export default function Dashboard() {
             await fetchNotes();
             setActiveNote(null);
         } catch (err: unknown) {
-            // We check if it's an actual Error before accessing .message
             const message = err instanceof Error ? err.message : "An unexpected error occurred";
             alert(message);
         } finally {
@@ -64,7 +63,6 @@ export default function Dashboard() {
             await fetchNotes();
             setActiveNote(null);
         } catch (err: unknown) {
-            // We check if it's an actual Error before accessing .message
             const message = err instanceof Error ? err.message : "An unexpected error occurred";
             alert(message);
         } finally {
@@ -72,22 +70,22 @@ export default function Dashboard() {
         }
     };
 
-    if (status === 'loading') return <div className="p-10 text-center">Loading...</div>;
+    if (status === 'loading') return <div className="p-10 text-center bg-black text-white h-screen">Loading...</div>;
 
     return (
-        <div className="flex h-screen bg-white font-sans">
-            {/* Sidebar */}
-            <aside className="w-72 border-r p-6 flex flex-col space-y-6">
+        <div className="flex h-screen bg-black text-white font-sans">
+            {/* Sidebar - Dark Charcoal */}
+            <aside className="w-72 border-r border-zinc-800 bg-zinc-950 p-6 flex flex-col space-y-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold">My Notes</h2>
-                    <button onClick={() => signOut()} className="text-xs text-red-500 hover:underline">
+                    <h2 className="text-xl font-bold tracking-tight">My Notes</h2>
+                    <button onClick={() => signOut()} className="text-xs text-zinc-500 hover:text-red-400 transition">
                         Logout
                     </button>
                 </div>
 
                 <button
                     onClick={() => setActiveNote({ title: '', content: '' })}
-                    className="w-full bg-black text-white rounded p-2 hover:opacity-90 transition"
+                    className="w-full bg-white text-black font-bold rounded p-2 hover:bg-zinc-200 transition"
                 >
                     + New Note
                 </button>
@@ -97,19 +95,19 @@ export default function Dashboard() {
                         <div
                             key={n.id}
                             onClick={() => setActiveNote(n)}
-                            className={`p-3 cursor-pointer rounded border transition ${activeNote?.id === n.id ? 'border-black shadow-sm font-medium' : 'border-transparent hover:bg-zinc-50'}`}
+                            className={`p-3 cursor-pointer rounded border transition ${activeNote?.id === n.id ? 'border-white bg-zinc-900 font-medium' : 'border-transparent text-zinc-400 hover:bg-zinc-900 hover:text-white'}`}
                         >
                             {n.title || 'Untitled Note'}
                         </div>
                     ))}
                 </div>
 
-                <div className="pt-4 border-t space-y-2">
-                    <button onClick={() => window.location.href='/api/notes/export'} className="w-full text-left text-xs text-zinc-500 hover:text-black">
-                        Download All JSON
+                <div className="pt-4 border-t border-zinc-800 space-y-2">
+                    <button onClick={() => window.location.href='/api/notes/export'} className="w-full text-left text-xs text-zinc-500 hover:text-white transition">
+                        ↓ Export All JSON
                     </button>
-                    <button onClick={() => fileInputRef.current?.click()} className="w-full text-left text-xs text-zinc-500 hover:text-black">
-                        Import JSON File
+                    <button onClick={() => fileInputRef.current?.click()} className="w-full text-left text-xs text-zinc-500 hover:text-white transition">
+                        ↑ Import JSON File
                     </button>
                     <input type="file" ref={fileInputRef} className="hidden" accept=".json" onChange={(e) => {
                         const file = e.target.files?.[0];
@@ -126,18 +124,19 @@ export default function Dashboard() {
                 </div>
             </aside>
 
-            {/* Main Content Area */}
-            <main className="flex-1 p-10 overflow-y-auto">
+            {/* Main Content Area - Deep Black */}
+            <main className="flex-1 p-10 overflow-y-auto bg-black">
                 {activeNote ? (
                     <div className="max-w-4xl mx-auto space-y-6">
                         <input
-                            className="text-4xl font-bold w-full outline-none border-b pb-2 focus:border-black transition"
+                            className="text-4xl font-bold w-full bg-transparent outline-none border-b border-zinc-800 pb-2 focus:border-white transition placeholder-zinc-700"
                             placeholder="Note Title"
                             value={activeNote.title}
                             onChange={(e) => setActiveNote({...activeNote, title: e.target.value})}
                         />
 
-                        <div key={activeNote.id ?? 'new'} className="min-h-[500px] border rounded-lg p-4 shadow-sm">
+                        {/* Editor Container - Zinc styling for dark mode */}
+                        <div key={activeNote.id ?? 'new'} className="min-h-[500px] border border-zinc-800 rounded-lg p-4 bg-zinc-950 shadow-2xl">
                             <Editor
                                 initialContent={activeNote.content}
                                 onChange={(json) => setActiveNote({...activeNote, content: json})}
@@ -145,19 +144,23 @@ export default function Dashboard() {
                         </div>
 
                         <div className="flex gap-3">
-                            <button onClick={handleSave} disabled={loading} className="bg-black text-white px-8 py-2 rounded shadow hover:opacity-90 transition">
+                            <button
+                                onClick={handleSave}
+                                disabled={loading}
+                                className="bg-white text-black px-8 py-2 rounded font-bold hover:bg-zinc-200 transition disabled:bg-zinc-600"
+                            >
                                 {loading ? 'Saving...' : 'Save Changes'}
                             </button>
                             {activeNote.id && (
-                                <button onClick={handleDelete} className="border border-red-500 text-red-500 px-8 py-2 rounded hover:bg-red-50 transition">
+                                <button onClick={handleDelete} className="border border-zinc-800 text-zinc-500 px-8 py-2 rounded hover:border-red-500 hover:text-red-500 transition">
                                     Delete
                                 </button>
                             )}
                         </div>
                     </div>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-zinc-400 border-2 border-dashed rounded-xl m-4">
-                        <p>Open a note to start editing.</p>
+                    <div className="h-full flex items-center justify-center text-zinc-600 border-2 border-dashed border-zinc-800 rounded-xl m-4">
+                        <p className="text-lg">Select a note or create one to get started.</p>
                     </div>
                 )}
             </main>
