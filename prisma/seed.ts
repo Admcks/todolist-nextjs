@@ -4,13 +4,11 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-    // 1. Clean the database (optional, but keeps things tidy)
     await prisma.note.deleteMany({});
     await prisma.user.deleteMany({});
 
     const hashedPassword = await bcrypt.hash('demo1234', 12);
 
-    // 2. Create the demo user
     const user = await prisma.user.create({
         data: {
             name: 'demo',
@@ -18,7 +16,6 @@ async function main() {
         },
     });
 
-    // 3. Create some demo notes (using BlockNote JSON format)
     await prisma.note.createMany({
         data: [
             {

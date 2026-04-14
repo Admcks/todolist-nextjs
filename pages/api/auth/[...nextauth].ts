@@ -30,7 +30,6 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Invalid password");
                 }
 
-                // Return the user object (NextAuth expects 'id' as a string)
                 return {
                     id: user.id.toString(),
                     name: user.name
@@ -43,7 +42,7 @@ export const authOptions: NextAuthOptions = {
     },
     pages: {
         signIn: '/login',
-        error: '/login', // Redirect errors back to login
+        error: '/login',
     },
     callbacks: {
         async session({ session, token }) {
@@ -59,7 +58,7 @@ export const authOptions: NextAuthOptions = {
             return token;
         }
     },
-    secret: process.env.NEXTAUTH_SECRET, // Ensure this is in your .env!
+    secret: process.env.NEXTAUTH_SECRET,
 };
 
 export default NextAuth(authOptions);

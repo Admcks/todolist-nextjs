@@ -11,7 +11,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
         const data = req.body;
-        // Data could be a single object or an array (Requirement Task 6)
         const notesToImport = Array.isArray(data) ? data : [data];
 
         const createdNotes = await Promise.all(
@@ -21,7 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         title: note.title || "Imported Note",
                         content: note.content || "",
                         userId: session.user.id,
-                        // If the JSON has dates, we use them, otherwise default to now
                         createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
                     }
                 })
