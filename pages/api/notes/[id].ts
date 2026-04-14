@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../auth/[...nextauth]";
 import { prisma } from "@/lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!session) return res.status(401).json({ message: "Unauthorized" });
 
     const noteId = Number(req.query.id); // Convert URL param to number
-    const userId = session.user.id;
+    const userId = req.query;
 
     // GET: Fetch one note
     if (req.method === 'GET') {
@@ -20,16 +20,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // PUT: Update a note
     if (req.method === 'PUT') {
+        const { id } = req.query; // Get ID from the URL
         const { title, content } = req.body;
+
         if (!title) return res.status(400).json({ message: "Title is required" });
 
         try {
             const updated = await prisma.note.updateMany({
-                where: { id: noteId, userId: userId },
+                // Security: Only update if the note belongs to this user
+                where: {
+                    id: Number(id),
+                    userId: userId
+                },
                 data: { title, content }
             });
-            return res.json({ success: !!updated.count });
+
+            // Check if anything was actually changed
+            if (updated.count === 0) {
+                return res.status(404).json({ message: "Note not found or unauthorized" });
+            }
+
+            return res.status(200).json({ message: "Update successful" });
         } catch (e) {
+            console.error(e);
             return res.status(500).json({ message: "Update failed" });
         }
     }

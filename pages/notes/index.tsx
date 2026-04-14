@@ -74,8 +74,14 @@ export default function Dashboard() {
             // 2. We IMMEDIATELY check if the request was successful
             // This is where that 'errorData' block goes!
             if (!response.ok) {
-                const errorData = (await response.json()) as { message?: string };
-                throw new Error(errorData.message || "Failed to save");
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Failed to save");
+                } else {
+                    // If it's HTML, the server crashed—get the status code instead
+                    throw new Error(`Server Error: ${response.status}`);
+                }
             }
 
             // 3. If successful, we refresh and close
