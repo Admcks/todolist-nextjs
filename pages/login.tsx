@@ -1,28 +1,62 @@
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Login() {
     const [form, setForm] = useState({ name: '', password: '' });
+    const [error, setError] = useState('');
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
         const res = await signIn('credentials', {
-            ...form,
+            name: form.name,
+            password: form.password,
             redirect: false,
         });
-        if (res?.ok) router.push('/notes');
+
+        if (res?.error) {
+            setError(res.error);
+        } else if (res?.ok) {
+            router.push('/notes');
+        }
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen">
-            <form onSubmit={handleSubmit} className="p-8 border rounded-lg shadow-md space-y-4">
-                <h1 className="text-2xl font-bold">Login</h1>
-                <input className="w-full p-2 border rounded" placeholder="Username" onChange={e => setForm({...form, name: e.target.value})} />
-                <input className="w-full p-2 border rounded" type="password" placeholder="Password" onChange={e => setForm({...form, password: e.target.value})} />
-                <button className="w-full bg-black text-white p-2 rounded">Login</button>
-                <p className="text-sm">Don&#39;t have an account? <a href="/register" className="underline">Register</a></p>
+        <div className="flex flex-col items-center justify-center h-screen bg-zinc-50">
+            <form onSubmit={handleSubmit} className="p-8 border bg-white rounded-lg shadow-md space-y-4 w-80">
+                <h1 className="text-2xl font-bold text-center">Login</h1>
+
+                {error && (
+                    <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
+                        {error === "CredentialsSignin" ? "Invalid login" : error}
+                    </p>
+                )}
+
+                <input
+                    className="w-full p-2 border rounded"
+                    placeholder="Username"
+                    required
+                    onChange={e => setForm({...form, name: e.target.value})}
+                />
+                <input
+                    className="w-full p-2 border rounded"
+                    type="password"
+                    placeholder="Password"
+                    required
+                    onChange={e => setForm({...form, password: e.target.value})}
+                />
+
+                <button className="w-full bg-black text-white p-2 rounded hover:bg-zinc-800 transition">
+                    Login
+                </button>
+
+                <p className="text-sm text-center">
+                    Don&#39;t have an account? <Link href="/register" className="underline font-medium">Register</Link>
+                </p>
             </form>
         </div>
     );

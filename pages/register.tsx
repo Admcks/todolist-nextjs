@@ -7,7 +7,7 @@ export default function Register() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await fetch('/api/auth/register', {
+        await fetch('/api/register', {
             method: 'POST',
             body: JSON.stringify(form),
             headers: { 'Content-Type': 'application/json' },

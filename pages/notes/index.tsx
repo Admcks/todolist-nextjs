@@ -55,28 +55,40 @@ export default function Dashboard() {
 
     // 2. Save Note (Handles both Create and Update)
     const handleSave = async () => {
-        // 1. Add this "Guard Clause" at the top
-        if (!activeNote) return;
-
-        // Now TypeScript knows for sure that activeNote is NOT null
-        if (!activeNote.title) {
+        if (!activeNote || !activeNote.title) {
             return alert("Title is required!");
         }
 
         setLoading(true);
+        try {
+            const method = activeNote.id ? 'PUT' : 'POST';
+            const url = activeNote.id ? `/api/notes/${activeNote.id}` : '/api/notes';
 
-        const method = activeNote.id ? 'PUT' : 'POST';
-        const url = activeNote.id ? `/api/notes/${activeNote.id}` : '/api/notes';
+            // 1. We start the request
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(activeNote),
+            });
 
-        await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(activeNote),
-        });
+            // 2. We IMMEDIATELY check if the request was successful
+            // This is where that 'errorData' block goes!
+            if (!response.ok) {
+                const errorData = (await response.json()) as { message?: string };
+                throw new Error(errorData.message || "Failed to save");
+            }
 
-        await fetchNotes();
-        setLoading(false);
-        setActiveNote(null);
+            // 3. If successful, we refresh and close
+            await fetchNotes();
+            setActiveNote(null);
+        } catch (err: unknown) {
+            // 4. If any of the above fails, it jumps here
+            const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+            alert("Error saving note: " + errorMessage);
+        } finally {
+            // 5. This runs no matter what to stop the loading spinner
+            setLoading(false);
+        }
     };
 
     // 3. Export JSON (Requirement Task 5)
