@@ -1,17 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
-import { prisma } from "@/lib/prisma"; // Using relative path for stability
+import { prisma } from "@/lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getServerSession(req, res, authOptions);
     if (!session || !session.user) return res.status(401).json({ message: "Unauthorized" });
 
-    // 1. FIXED DEFINITIONS
-    const { id } = req.query;          // This is the Note's ID from the URL
-    const userId = Number(session.user.id); // This is the logged-in User's ID
+    const { id } = req.query;
+    const userId = Number(session.user.id);
 
-    // GET: Fetch one note
     if (req.method === 'GET') {
         const note = await prisma.note.findFirst({
             where: {
@@ -22,7 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return note ? res.json(note) : res.status(404).json({ message: "Not found" });
     }
 
-    // PUT: Update a note
     if (req.method === 'PUT') {
         const { title, content } = req.body;
         if (!title) return res.status(400).json({ message: "Title is required" });
@@ -30,8 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
             const updated = await prisma.note.updateMany({
                 where: {
-                    id: Number(id), // Correctly use the Note ID
-                    userId: userId  // Correctly use the User ID
+                    id: Number(id),
+                    userId: userId
                 },
                 data: { title, content }
             });
@@ -47,7 +44,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 
-    // DELETE: Remove a note
     if (req.method === 'DELETE') {
         try {
             await prisma.note.deleteMany({

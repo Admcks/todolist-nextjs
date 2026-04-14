@@ -9,7 +9,6 @@ interface EditorProps {
 }
 
 export default function Editor({ initialContent, onChange }: EditorProps) {
-    // Initialize the editor
     const editor = useCreateBlockNote({
         initialContent: initialContent ? JSON.parse(initialContent) : undefined,
     });
@@ -18,7 +17,6 @@ export default function Editor({ initialContent, onChange }: EditorProps) {
         <BlockNoteView
             editor={editor}
             onChange={() => {
-                // We save the blocks as a JSON string for the database
                 onChange(JSON.stringify(editor.document));
             }}
         />

@@ -8,12 +8,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!session) return res.status(401).send("Unauthorized");
 
     const userId = session.user.id;
-    const { id } = req.query; // Check if user wants ALL or just ONE note
+    const { id } = req.query;
 
     const notes = await prisma.note.findMany({
         where: {
             userId: userId,
-            ...(id ? { id: Number(id) } : {}) // Filter by ID only if provided
+            ...(id ? { id: Number(id) } : {})
         },
         select: { title: true, content: true, createdAt: true, updatedAt: true }
     });

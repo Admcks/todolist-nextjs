@@ -1,10 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]"; // You might need to export config from nextauth file
+import { authOptions } from "../auth/[...nextauth]";
 import { prisma } from "../../../lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // 1. Check if user is logged in (Requirement: Security)
     const session = await getServerSession(req, res, authOptions);
 
     if (!session || !session.user) {
@@ -13,7 +12,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const userId = session.user.id;
 
-    // 2. GET: Fetch user's notes
     if (req.method === 'GET') {
         const notes = await prisma.note.findMany({
             where: { userId: userId },
@@ -22,7 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json(notes);
     }
 
-    // 3. POST: Create a new note
     if (req.method === 'POST') {
         const { title, content } = req.body;
 
