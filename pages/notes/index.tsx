@@ -70,6 +70,9 @@ export default function Dashboard() {
         }
     };
 
+    const handleExport = (id?: number) => {
+        window.location.href = id ? `/api/notes/export?id=${id}` : '/api/notes/export';
+    };
     if (status === 'loading') return <div className="p-10 text-center bg-black text-white h-screen">Loading...</div>;
 
     return (
@@ -154,6 +157,14 @@ export default function Dashboard() {
                             {activeNote.id && (
                                 <button onClick={handleDelete} className="border border-zinc-800 text-zinc-500 px-8 py-2 rounded hover:border-red-500 hover:text-red-500 transition">
                                     Delete
+                                </button>
+                            )}
+                            {activeNote.id && (
+                                <button
+                                    onClick={() => handleExport(activeNote.id)}
+                                    className="border border-zinc-300 px-6 py-2 rounded-full font-medium"
+                                >
+                                    Download JSON
                                 </button>
                             )}
                         </div>
