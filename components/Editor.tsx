@@ -5,17 +5,33 @@ import "@blocknote/mantine/style.css";
 
 interface EditorProps {
     initialContent?: string;
-    onChange: (html: string) => void;
+    onChange: (json: string) => void;
 }
 
 export default function Editor({ initialContent, onChange }: EditorProps) {
+
+    const getSafeInitialContent = () => {
+        if (!initialContent) return undefined;
+
+        try {
+            return JSON.parse(initialContent);
+        } catch (e) {
+            return [
+                {
+                    type: "paragraph",
+                    content: [{ type: "text", text: initialContent, styles: {} }],
+                },
+            ];
+        }
+    };
     const editor = useCreateBlockNote({
-        initialContent: initialContent ? JSON.parse(initialContent) : undefined,
+        initialContent: getSafeInitialContent(),
     });
 
     return (
         <BlockNoteView
             editor={editor}
+            theme="dark"
             onChange={() => {
                 onChange(JSON.stringify(editor.document));
             }}
