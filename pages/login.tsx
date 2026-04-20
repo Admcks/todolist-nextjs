@@ -26,7 +26,7 @@ export default function Login() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen ">
+        <div className="flex flex-col items-center justify-center h-screen">
             <form onSubmit={handleSubmit} className="p-8 border rounded-lg shadow-md space-y-4">
                 <h1 className="text-2xl font-bold">Login</h1>
 
@@ -56,8 +56,8 @@ export default function Login() {
                     Login
                 </button>
 
-                <p className="text-sm text-center text-gray-600 pt-2">
-                    Don&#39;t have an account? <Link href="/register" className="underline text-gray-400 font-medium">Register</Link>
+                <p className="text-sm text-center text-zinc-600 pt-2">
+                    Don&#39;t have an account? <Link href="/register" className="underline text-zinc-400 font-medium">Register</Link>
                 </p>
             </form>
         </div>
